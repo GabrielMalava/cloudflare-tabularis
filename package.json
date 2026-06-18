@@ -1,0 +1,20 @@
+{
+  "name": "tubularis-d1-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cloudflare D1 driver plugin for Tabularis (JSON-RPC over stdio).",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node20 --format=cjs --outfile=dist/index.cjs",
+    "dev": "node --experimental-strip-types src/index.ts",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "install:local": "npm run build && bash scripts/install-local.sh",
+    "smoke": "npm run build && node scripts/smoke.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.21",
+    "esbuild": "^0.24.2",
+    "typescript": "^5.7.3"
+  }
+}
