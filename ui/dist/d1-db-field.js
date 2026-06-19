@@ -2,6 +2,22 @@ var __tabularis_plugin__ = (function (jsx, api) {
   "use strict";
   var DRIVER = "tubularis-d1";
 
+  function parse(raw) {
+    var s = typeof raw === "string" ? raw : "";
+    if (s.indexOf("|") === -1) return { accountId: "", token: "", database: s };
+    var parts = s.split("|");
+    return {
+      accountId: parts[0] || "",
+      token: parts[1] || "",
+      database: parts.slice(2).join("|"),
+    };
+  }
+
+  function compose(accountId, token, database) {
+    if (!accountId && !token) return database;
+    return accountId + "|" + token + "|" + database;
+  }
+
   var labelStyle = {
     fontSize: "10px",
     textTransform: "uppercase",
@@ -49,34 +65,35 @@ var __tabularis_plugin__ = (function (jsx, api) {
       var ctx = props.context;
       if (ctx.driver !== DRIVER) return null;
 
-      var accountId = typeof ctx.host === "string" ? ctx.host : "";
-      var token = typeof ctx.password === "string" ? ctx.password : "";
-      var database = typeof ctx.database === "string" ? ctx.database : "";
-
-      var onAccountIdChange = ctx.onHostChange || function () {};
-      var onTokenChange = ctx.onPasswordChange || function () {};
-      var onDatabaseChange = ctx.onDatabaseChange || function () {};
+      var p = parse(ctx.database);
+      var emit = ctx.onDatabaseChange || function () {};
 
       return jsx.jsxs("div", {
         style: { display: "flex", flexDirection: "column", gap: "12px" },
         children: [
           field(
             "Account ID",
-            accountId,
-            onAccountIdChange,
+            p.accountId,
+            function (v) {
+              emit(compose(v, p.token, p.database));
+            },
             "Cloudflare Account ID (leave blank to use plugin Settings)",
           ),
           field(
             "API Token",
-            token,
-            onTokenChange,
+            p.token,
+            function (v) {
+              emit(compose(p.accountId, v, p.database));
+            },
             "D1 Edit token (leave blank to use plugin Settings)",
             "password",
           ),
           field(
             "D1 Database (name or ID)",
-            database,
-            onDatabaseChange,
+            p.database,
+            function (v) {
+              emit(compose(p.accountId, p.token, v));
+            },
             "e.g. my-database or a database UUID",
           ),
           jsx.jsx("p", {

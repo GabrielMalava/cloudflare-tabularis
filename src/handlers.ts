@@ -33,10 +33,28 @@ const nameToId = new Map<string, string>();
 
 let pluginSettings: Record<string, unknown> = {};
 
+interface ParsedDatabaseField {
+  accountId: string;
+  token: string;
+  database: string;
+}
+
+function parseDatabaseField(raw: unknown): ParsedDatabaseField {
+  const s = String(raw ?? '');
+  if (!s.includes('|')) return { accountId: '', token: '', database: s };
+  const parts = s.split('|');
+  return {
+    accountId: parts[0] ?? '',
+    token: parts[1] ?? '',
+    database: parts.slice(2).join('|'),
+  };
+}
+
 function accountAuth(p: Params): AccountAuth {
   const cp = p.params as ConnectionParams | undefined;
-  const accountId = String(cp?.host || pluginSettings.account_id || '').trim();
-  const token = String(cp?.password || pluginSettings.api_token || '').trim();
+  const parsed = parseDatabaseField(cp?.database);
+  const accountId = String(parsed.accountId || cp?.host || pluginSettings.account_id || '').trim();
+  const token = String(parsed.token || cp?.password || pluginSettings.api_token || '').trim();
   const missing: string[] = [];
   if (!accountId) missing.push('Account ID (connection or plugin settings)');
   if (!token) missing.push('API token (connection or plugin settings)');
@@ -48,7 +66,7 @@ function accountAuth(p: Params): AccountAuth {
 
 async function conn(p: Params): Promise<D1Config> {
   const auth = accountAuth(p);
-  const database = String((p.params as ConnectionParams | undefined)?.database ?? '').trim();
+  const database = parseDatabaseField((p.params as ConnectionParams | undefined)?.database).database.trim();
   if (!database) {
     throw new Error('No Cloudflare D1 database selected. Open the Databases tab and pick one.');
   }

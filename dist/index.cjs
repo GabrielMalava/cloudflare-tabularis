@@ -116,10 +116,21 @@ function columnDefinitionSql(col, inlinePrimaryKey) {
 var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 var nameToId = /* @__PURE__ */ new Map();
 var pluginSettings = {};
+function parseDatabaseField(raw) {
+  const s = String(raw ?? "");
+  if (!s.includes("|")) return { accountId: "", token: "", database: s };
+  const parts = s.split("|");
+  return {
+    accountId: parts[0] ?? "",
+    token: parts[1] ?? "",
+    database: parts.slice(2).join("|")
+  };
+}
 function accountAuth(p) {
   const cp = p.params;
-  const accountId = String(cp?.host || pluginSettings.account_id || "").trim();
-  const token = String(cp?.password || pluginSettings.api_token || "").trim();
+  const parsed = parseDatabaseField(cp?.database);
+  const accountId = String(parsed.accountId || cp?.host || pluginSettings.account_id || "").trim();
+  const token = String(parsed.token || cp?.password || pluginSettings.api_token || "").trim();
   const missing = [];
   if (!accountId) missing.push("Account ID (connection or plugin settings)");
   if (!token) missing.push("API token (connection or plugin settings)");
@@ -130,7 +141,7 @@ function accountAuth(p) {
 }
 async function conn(p) {
   const auth = accountAuth(p);
-  const database = String(p.params?.database ?? "").trim();
+  const database = parseDatabaseField(p.params?.database).database.trim();
   if (!database) {
     throw new Error("No Cloudflare D1 database selected. Open the Databases tab and pick one.");
   }
