@@ -8,20 +8,24 @@ The plugin is a standalone executable that speaks **JSON-RPC 2.0 over stdin/stdo
 the protocol Tabularis uses for external drivers. It is stateless: every request carries
 the full connection params, so each call maps to a D1 REST request.
 
-## Setup (v0.2 — custom UI)
+## Setup (v0.3 — per-connection credentials)
 
 The driver is API-based (`no_connection_required`), so the standard host/port form is hidden.
-Credentials live in the plugin's **Settings**, and each connection only picks a database:
+Each connection carries its **own** credentials, so you can connect to multiple Cloudflare
+accounts / databases at once:
 
-1. **Settings → Plugins → Cloudflare D1 (gear icon)** — fill in:
-   - **Account ID** — your Cloudflare Account ID
+1. **New connection → Cloudflare D1** — the form (rendered by `ui/dist/d1-db-field.js`) shows:
+   - **Account ID** — the Cloudflare Account ID for this connection
    - **API Token** — a token with the **D1 Edit** permission
-2. **New connection → Cloudflare D1** — the form shows a single **D1 Database** field
-   (rendered by `ui/dist/d1-db-field.js`). Enter the database **name** or its UUID.
+   - **D1 Database** — the database **name** or its UUID
+2. Create as many connections as you like, each pointing at a different account or database.
 
-Account ID + token are global (one Cloudflare account); the database is per-connection.
-For headless testing, the plugin also falls back to `ConnectionParams` (Host = account id,
-Password = token) — see `npm run smoke`.
+**Optional defaults:** if you leave a connection's Account ID / API Token blank, the plugin
+falls back to the global **Settings → Plugins → Cloudflare D1 (gear icon)** values. This keeps
+older connections working and lets you avoid retyping shared credentials.
+
+Internally the credentials map to `ConnectionParams` (Host = account id, Password = token,
+Database = database name/UUID) — see `npm run smoke`.
 
 ## Develop
 

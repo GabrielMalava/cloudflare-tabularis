@@ -35,11 +35,11 @@ let pluginSettings: Record<string, unknown> = {};
 
 function accountAuth(p: Params): AccountAuth {
   const cp = p.params as ConnectionParams | undefined;
-  const accountId = String(pluginSettings.account_id ?? cp?.host ?? '').trim();
-  const token = String(pluginSettings.api_token ?? cp?.password ?? '').trim();
+  const accountId = String(cp?.host || pluginSettings.account_id || '').trim();
+  const token = String(cp?.password || pluginSettings.api_token || '').trim();
   const missing: string[] = [];
-  if (!accountId) missing.push('Account ID (plugin settings)');
-  if (!token) missing.push('API token (plugin settings)');
+  if (!accountId) missing.push('Account ID (connection or plugin settings)');
+  if (!token) missing.push('API token (connection or plugin settings)');
   if (missing.length > 0) {
     throw new Error(`Missing Cloudflare D1 credentials: ${missing.join(', ')}.`);
   }
