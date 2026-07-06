@@ -1,9 +1,9 @@
 {
   "$schema": "https://tabularis.dev/schemas/plugin-manifest.json",
   "id": "tubularis-d1",
-  "name": "Cloudflare D1",
+  "name": "Cloudflare D1 (HTTP API)",
   "version": "0.3.0",
-  "description": "Cloudflare D1 (serverless SQLite) driver over the D1 HTTP API.",
+  "description": "Cloudflare D1 (serverless SQLite) driver over the D1 HTTP API — per-connection credentials, views and ER diagrams. macOS / Linux / Windows.",
   "default_port": null,
   "default_username": "",
   "executable": "tubularis-d1",

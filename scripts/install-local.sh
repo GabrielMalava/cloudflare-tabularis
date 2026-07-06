@@ -2,44 +2,36 @@
 set -e
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+BIN_NAME="tubularis-d1"
 
 case "$(uname -s)" in
-  Darwin) DEST="$HOME/Library/Application Support/com.debba.tabularis/plugins/tubularis-d1" ;;
-  Linux)  DEST="$HOME/.local/share/tabularis/plugins/tubularis-d1" ;;
-  *)      echo "Unsupported OS for this installer. Copy dist/index.cjs, launcher/tubularis-d1 and manifest.json manually." ; exit 1 ;;
+  Darwin) DEST="$HOME/Library/Application Support/com.debba.tabularis/plugins/$BIN_NAME" ;;
+  Linux)  DEST="$HOME/.local/share/tabularis/plugins/$BIN_NAME" ;;
+  *)      echo "Unsupported OS for this installer. Run 'npm run package' and copy a zip's contents manually." ; exit 1 ;;
 esac
 
-if [ ! -f "$ROOT/dist/index.cjs" ]; then
-  echo "dist/index.cjs not found. Run 'npm run build' first." >&2
-  exit 1
-fi
+case "$(uname -s)-$(uname -m)" in
+  Darwin-arm64)  TARGET="bun-darwin-arm64" ;;
+  Darwin-x86_64) TARGET="bun-darwin-x64" ;;
+  Linux-x86_64)  TARGET="bun-linux-x64" ;;
+  Linux-aarch64) TARGET="bun-linux-arm64" ;;
+  *)             echo "Unsupported host arch: $(uname -s)-$(uname -m)" >&2 ; exit 1 ;;
+esac
 
-NODE_BIN=$(command -v node || true)
-if [ -z "$NODE_BIN" ]; then
-  echo "node not found on PATH. Install Node.js first." >&2
+if ! command -v bun >/dev/null 2>&1; then
+  echo "bun not found on PATH. Install it: https://bun.sh" >&2
   exit 1
 fi
 
 rm -rf "$DEST"
-mkdir -p "$DEST"
+mkdir -p "$DEST/ui/dist"
+
+echo "Compiling native binary ($TARGET)..."
+bun build "$ROOT/src/index.ts" --compile --target="$TARGET" --outfile "$DEST/$BIN_NAME"
+chmod +x "$DEST/$BIN_NAME"
 cp "$ROOT/manifest.json" "$DEST/manifest.json"
-cp "$ROOT/dist/index.cjs" "$DEST/index.cjs"
-
-if [ -d "$ROOT/ui" ]; then
-  cp -R "$ROOT/ui" "$DEST/ui"
-fi
-
-# Generate a launcher with the absolute node path baked in. A GUI app launched
-# from Finder/Dock does not inherit the shell PATH (and nvm node is never on it),
-# so relying on `node` from PATH would make the plugin fail to spawn.
-cat > "$DEST/tubularis-d1" <<EOF
-#!/bin/sh
-DIR=\$(CDPATH= cd -- "\$(dirname -- "\$0")" && pwd)
-exec "$NODE_BIN" "\$DIR/index.cjs" "\$@"
-EOF
-chmod +x "$DEST/tubularis-d1"
+cp "$ROOT/ui/dist/d1-db-field.js" "$DEST/ui/dist/d1-db-field.js"
 
 echo "Installed Cloudflare D1 plugin to:"
 echo "  $DEST"
-echo "Using node: $NODE_BIN"
 echo "Restart Tabularis to load it."

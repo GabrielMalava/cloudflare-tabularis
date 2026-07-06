@@ -45,17 +45,39 @@ echo '{"jsonrpc":"2.0","id":1,"method":"test_connection","params":{"params":{"ho
 
 ## Install locally
 
+Requires [bun](https://bun.sh) (`brew install bun`), which compiles `src` into a
+self-contained native binary — no Node.js needed at runtime.
+
 ```bash
 npm run install:local
 ```
 
-This builds and copies `manifest.json`, `dist/index.cjs` and the `tubularis-d1` launcher to:
+This compiles the binary for your host platform and copies it together with
+`manifest.json` and `ui/dist/` to:
 
-- macOS: `~/Library/Application Support/tabularis/plugins/tubularis-d1/`
+- macOS: `~/Library/Application Support/com.debba.tabularis/plugins/tubularis-d1/`
 - Linux: `~/.local/share/tabularis/plugins/tubularis-d1/`
 
-Restart Tabularis; "Cloudflare D1" appears in the database type list. The launcher runs
-the bundle with your local `node`, so Node must be on `PATH`.
+Restart Tabularis; "Cloudflare D1 (HTTP API)" appears in the database type list.
+
+## Package & publish
+
+`bun` cross-compiles every platform from a single machine:
+
+```bash
+npm run package   # -> release/tubularis-d1-<platform>.zip for all 5 platforms
+```
+
+Each zip extracts to a folder containing the native binary (`tubularis-d1`, or
+`tubularis-d1.exe` on Windows), `manifest.json` and `ui/dist/` — the exact layout
+Tabularis expects.
+
+Releases are automated: pushing a `vX.Y.Z` tag runs
+[`.github/workflows/release.yml`](.github/workflows/release.yml), which builds all
+zips and attaches them to the GitHub Release. To list the driver in the official
+Plugin Center, open a PR adding an entry to
+[`plugins/registry.json`](https://github.com/TabularisDB/tabularis/blob/main/plugins/registry.json)
+pointing at those release assets.
 
 ## Supported operations
 

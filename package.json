@@ -9,7 +9,8 @@
     "dev": "node --experimental-strip-types src/index.ts",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "typecheck": "tsc --noEmit",
-    "install:local": "npm run build && bash scripts/install-local.sh",
+    "package": "bash scripts/package.sh",
+    "install:local": "bash scripts/install-local.sh",
     "smoke": "npm run build && node scripts/smoke.mjs"
   },
   "devDependencies": {
