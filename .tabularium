@@ -1,27 +1,42 @@
 {
-  "$schema": "https://tabularis.dev/schemas/plugin-manifest.json",
-  "id": "cloudflare-d1-http",
-  "name": "Cloudflare D1 (HTTP API)",
+  "name": "cloudflare-d1-http",
   "version": "0.4.0",
-  "description": "Cloudflare D1 (serverless SQLite) driver over the D1 HTTP API, with per-connection credentials, views and ER diagrams. macOS / Linux / Windows.",
-  "default_port": null,
-  "default_username": "",
+  "kind": "driver",
+  "description": "Cloudflare D1 (serverless SQLite) driver for Tabularis over the D1 HTTP API, with per-connection credentials, views and ER diagrams.",
+  "engine": "cloudflare-d1",
+  "paradigms": [
+    "sql"
+  ],
   "executable": "cloudflare-d1-http",
   "color": "#f6821f",
-  "icon": "database",
+  "icon": "assets/icon.png",
+  "readme": "README.md",
+  "tags": [
+    "driver",
+    "cloudflare",
+    "d1",
+    "sqlite",
+    "serverless"
+  ],
+  "homepage": "https://github.com/GabrielMalava/cloudflare-tabularis",
+  "support": {
+    "issues_url": "https://github.com/GabrielMalava/cloudflare-tabularis/issues"
+  },
   "capabilities": {
     "schemas": false,
     "views": true,
     "routines": false,
     "file_based": false,
     "folder_based": false,
-    "no_connection_required": true,
+    "connection_string": false,
     "identifier_quote": "\"",
     "alter_primary_key": false,
     "alter_column": false,
     "create_foreign_keys": false,
+    "no_connection_required": true,
     "manage_tables": true,
-    "readonly": false
+    "readonly": false,
+    "sql_dialect": "sqlite"
   },
   "settings": [
     {
@@ -29,7 +44,7 @@
       "label": "Default Account ID",
       "type": "string",
       "required": false,
-      "description": "Optional fallback Cloudflare Account ID, used when a connection leaves Account ID blank (Dashboard → Workers & Pages, right sidebar)."
+      "description": "Optional fallback Cloudflare Account ID, used when a connection leaves Account ID blank (Dashboard > Workers & Pages, right sidebar)."
     },
     {
       "key": "api_token",
@@ -51,7 +66,7 @@
     { "name": "INTEGER", "category": "numeric", "requires_length": false, "requires_precision": false },
     { "name": "REAL", "category": "numeric", "requires_length": false, "requires_precision": false },
     { "name": "NUMERIC", "category": "numeric", "requires_length": false, "requires_precision": false },
-    { "name": "BOOLEAN", "category": "other", "requires_length": false, "requires_precision": false },
+    { "name": "BOOLEAN", "category": "boolean", "requires_length": false, "requires_precision": false },
     { "name": "TEXT", "category": "string", "requires_length": false, "requires_precision": false },
     { "name": "BLOB", "category": "binary", "requires_length": false, "requires_precision": false }
   ]

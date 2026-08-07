@@ -1,6 +1,6 @@
 {
-  "name": "tubularis-d1-plugin",
-  "version": "0.1.0",
+  "name": "cloudflare-d1-http",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "description": "Cloudflare D1 driver plugin for Tabularis (JSON-RPC over stdio).",
