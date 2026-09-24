@@ -10,6 +10,7 @@ import {
   columnDefinitionSql,
   isWrappable,
   normalizeParam,
+  pkWhereClause,
   quoteIdent,
   quoteLiteral,
   stripTrailingSemicolon,
@@ -313,15 +314,17 @@ export const handlers: Record<string, (p: Params) => Promise<unknown>> = {
 
   async update_record(p): Promise<number> {
     const cfg = await conn(p);
-    const sql = `UPDATE ${quoteIdent(String(p.table))} SET ${quoteIdent(String(p.col_name))} = ? WHERE ${quoteIdent(String(p.pk_col))} = ?`;
-    const meta = await exec(cfg, sql, [normalizeParam(p.new_val), normalizeParam(p.pk_val)]);
+    const where = pkWhereClause(p);
+    const sql = `UPDATE ${quoteIdent(String(p.table))} SET ${quoteIdent(String(p.col_name))} = ? WHERE ${where.sql}`;
+    const meta = await exec(cfg, sql, [normalizeParam(p.new_val), ...where.params]);
     return Number(meta.changes ?? 0);
   },
 
   async delete_record(p): Promise<number> {
     const cfg = await conn(p);
-    const sql = `DELETE FROM ${quoteIdent(String(p.table))} WHERE ${quoteIdent(String(p.pk_col))} = ?`;
-    const meta = await exec(cfg, sql, [normalizeParam(p.pk_val)]);
+    const where = pkWhereClause(p);
+    const sql = `DELETE FROM ${quoteIdent(String(p.table))} WHERE ${where.sql}`;
+    const meta = await exec(cfg, sql, where.params);
     return Number(meta.changes ?? 0);
   },
 

@@ -60,3 +60,20 @@ export function columnDefinitionSql(
   }
   return sql;
 }
+
+export function pkWhereClause(p: Record<string, unknown>): { sql: string; params: unknown[] } {
+  const pkMap =
+    p.pk_map && typeof p.pk_map === 'object'
+      ? (p.pk_map as Record<string, unknown>)
+      : p.pk_col != null
+        ? { [String(p.pk_col)]: p.pk_val }
+        : {};
+  const cols = Object.keys(pkMap);
+  if (cols.length === 0) {
+    throw new Error('No primary key provided. Tables without a primary key cannot be edited.');
+  }
+  return {
+    sql: cols.map((c) => `${quoteIdent(c)} = ?`).join(' AND '),
+    params: cols.map((c) => normalizeParam(pkMap[c])),
+  };
+}

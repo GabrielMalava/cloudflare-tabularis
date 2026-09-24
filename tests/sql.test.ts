@@ -6,6 +6,7 @@ import {
   isReadQuery,
   isWrappable,
   normalizeParam,
+  pkWhereClause,
   quoteIdent,
   quoteLiteral,
   stripTrailingSemicolon,
@@ -62,4 +63,19 @@ test('columnDefinitionSql builds a not-null column with default', () => {
     false,
   );
   assert.equal(sql, `"status" TEXT NOT NULL DEFAULT 'active'`);
+});
+
+test('pkWhereClause builds a composite key filter from pk_map', () => {
+  assert.deepEqual(pkWhereClause({ pk_map: { id: 1, time_id: 'a' } }), {
+    sql: '"id" = ? AND "time_id" = ?',
+    params: [1, 'a'],
+  });
+});
+
+test('pkWhereClause falls back to legacy pk_col / pk_val', () => {
+  assert.deepEqual(pkWhereClause({ pk_col: 'id', pk_val: 7 }), { sql: '"id" = ?', params: [7] });
+});
+
+test('pkWhereClause rejects a missing primary key', () => {
+  assert.throws(() => pkWhereClause({ pk_map: {} }));
 });

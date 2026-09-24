@@ -111,6 +111,17 @@ function columnDefinitionSql(col, inlinePrimaryKey) {
   }
   return sql;
 }
+function pkWhereClause(p) {
+  const pkMap = p.pk_map && typeof p.pk_map === "object" ? p.pk_map : p.pk_col != null ? { [String(p.pk_col)]: p.pk_val } : {};
+  const cols = Object.keys(pkMap);
+  if (cols.length === 0) {
+    throw new Error("No primary key provided. Tables without a primary key cannot be edited.");
+  }
+  return {
+    sql: cols.map((c) => `${quoteIdent(c)} = ?`).join(" AND "),
+    params: cols.map((c) => normalizeParam(pkMap[c]))
+  };
+}
 
 // src/handlers.ts
 var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -359,14 +370,16 @@ var handlers = {
   },
   async update_record(p) {
     const cfg = await conn(p);
-    const sql = `UPDATE ${quoteIdent(String(p.table))} SET ${quoteIdent(String(p.col_name))} = ? WHERE ${quoteIdent(String(p.pk_col))} = ?`;
-    const meta = await exec(cfg, sql, [normalizeParam(p.new_val), normalizeParam(p.pk_val)]);
+    const where = pkWhereClause(p);
+    const sql = `UPDATE ${quoteIdent(String(p.table))} SET ${quoteIdent(String(p.col_name))} = ? WHERE ${where.sql}`;
+    const meta = await exec(cfg, sql, [normalizeParam(p.new_val), ...where.params]);
     return Number(meta.changes ?? 0);
   },
   async delete_record(p) {
     const cfg = await conn(p);
-    const sql = `DELETE FROM ${quoteIdent(String(p.table))} WHERE ${quoteIdent(String(p.pk_col))} = ?`;
-    const meta = await exec(cfg, sql, [normalizeParam(p.pk_val)]);
+    const where = pkWhereClause(p);
+    const sql = `DELETE FROM ${quoteIdent(String(p.table))} WHERE ${where.sql}`;
+    const meta = await exec(cfg, sql, where.params);
     return Number(meta.changes ?? 0);
   },
   async get_create_table_sql(p) {
