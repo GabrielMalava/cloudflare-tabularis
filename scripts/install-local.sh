@@ -2,7 +2,7 @@
 set -e
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-BIN_NAME="tubularis-d1"
+BIN_NAME="cloudflare-d1-http"
 
 case "$(uname -s)" in
   Darwin) DEST="$HOME/Library/Application Support/com.debba.tabularis/plugins/$BIN_NAME" ;;
@@ -30,6 +30,7 @@ echo "Compiling native binary ($TARGET)..."
 bun build "$ROOT/src/index.ts" --compile --target="$TARGET" --outfile "$DEST/$BIN_NAME"
 chmod +x "$DEST/$BIN_NAME"
 cp "$ROOT/manifest.json" "$DEST/manifest.json"
+cp "$ROOT/.tabularium" "$DEST/.tabularium"
 cp "$ROOT/ui/dist/d1-db-field.js" "$DEST/ui/dist/d1-db-field.js"
 
 echo "Installed Cloudflare D1 plugin to:"

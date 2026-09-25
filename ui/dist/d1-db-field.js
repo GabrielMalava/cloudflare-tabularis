@@ -1,6 +1,6 @@
 var __tabularis_plugin__ = (function (jsx, api) {
   "use strict";
-  var DRIVER = "tubularis-d1";
+  var DRIVER = "cloudflare-d1-http";
 
   function parse(raw) {
     var s = typeof raw === "string" ? raw : "";
