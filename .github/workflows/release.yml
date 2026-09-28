@@ -23,10 +23,18 @@ jobs:
       - name: Ensure zip is available
         run: sudo apt-get update && sudo apt-get install -y zip
 
+      - name: Stamp version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          jq --arg v "$VERSION" '.version = $v' .tabularium > .tabularium.tmp && mv .tabularium.tmp .tabularium
+          jq --arg v "$VERSION" '.version = $v' manifest.json > manifest.tmp.json && mv manifest.tmp.json manifest.json
+
       - name: Build & package all platforms
         run: bash scripts/package.sh
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release/*.zip
+          files: |
+            release/*.zip
+            .tabularium

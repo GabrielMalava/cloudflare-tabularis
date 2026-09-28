@@ -1,4 +1,4 @@
-# tubularis-d1-plugin
+# cloudflare-d1-http
 
 A [Tabularis](https://github.com/TabularisDB/tabularis) database driver plugin for
 **Cloudflare D1** (serverless SQLite), implemented in TypeScript and talking to the
@@ -8,7 +8,7 @@ The plugin is a standalone executable that speaks **JSON-RPC 2.0 over stdin/stdo
 the protocol Tabularis uses for external drivers. It is stateless: every request carries
 the full connection params, so each call maps to a D1 REST request.
 
-## Setup (v0.3 — per-connection credentials)
+## Setup (per-connection credentials)
 
 The driver is API-based (`no_connection_required`), so the standard host/port form is hidden.
 Each connection carries its **own** credentials, so you can connect to multiple Cloudflare
@@ -53,10 +53,10 @@ npm run install:local
 ```
 
 This compiles the binary for your host platform and copies it together with
-`manifest.json` and `ui/dist/` to:
+`manifest.json`, `.tabularium` and `ui/dist/` to:
 
-- macOS: `~/Library/Application Support/com.debba.tabularis/plugins/tubularis-d1/`
-- Linux: `~/.local/share/tabularis/plugins/tubularis-d1/`
+- macOS: `~/Library/Application Support/com.debba.tabularis/plugins/cloudflare-d1-http/`
+- Linux: `~/.local/share/tabularis/plugins/cloudflare-d1-http/`
 
 Restart Tabularis; "Cloudflare D1 (HTTP API)" appears in the database type list.
 
@@ -65,19 +65,28 @@ Restart Tabularis; "Cloudflare D1 (HTTP API)" appears in the database type list.
 `bun` cross-compiles every platform from a single machine:
 
 ```bash
-npm run package   # -> release/tubularis-d1-<platform>.zip for all 5 platforms
+npm run package   # -> release/cloudflare-d1-http-<platform>.zip for all 5 platforms
 ```
 
-Each zip extracts to a folder containing the native binary (`tubularis-d1`, or
-`tubularis-d1.exe` on Windows), `manifest.json` and `ui/dist/` — the exact layout
-Tabularis expects.
+Each zip extracts to a folder containing the native binary (`cloudflare-d1-http`, or
+`cloudflare-d1-http.exe` on Windows), `manifest.json`, `.tabularium` and `ui/dist/` — the
+exact layout Tabularis expects.
 
 Releases are automated: pushing a `vX.Y.Z` tag runs
-[`.github/workflows/release.yml`](.github/workflows/release.yml), which builds all
-zips and attaches them to the GitHub Release. To list the driver in the official
-Plugin Center, open a PR adding an entry to
-[`plugins/registry.json`](https://github.com/TabularisDB/tabularis/blob/main/plugins/registry.json)
-pointing at those release assets.
+[`.github/workflows/release.yml`](.github/workflows/release.yml), which stamps the
+version into the manifests, builds all zips and attaches them together with the
+`.tabularium` manifest to the GitHub Release.
+
+## Registry listing
+
+The plugin ships a [`.tabularium`](.tabularium) manifest so it can be listed on the
+official plugin registry at [registry.tabularis.dev](https://registry.tabularis.dev).
+Every release attaches the manifest as an asset; the registry ingests it, validates it
+against the [plugin manifest schema](https://registry.tabularis.dev/manifest.schema.json)
+and hashes the platform zips so Tabularis can verify downloads.
+
+Questions about the registry or the plugin protocol? Join the
+[Tabularis Discord](https://discord.com/invite/K2hmhfHRSt).
 
 ## Supported operations
 

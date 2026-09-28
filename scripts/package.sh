@@ -4,7 +4,7 @@ set -e
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$ROOT"
 
-BIN_NAME="tubularis-d1"
+BIN_NAME="cloudflare-d1-http"
 DIST="$ROOT/release"
 STAGE_ROOT="$ROOT/.stage"
 
@@ -39,6 +39,7 @@ for PLATFORM in $PLATFORMS; do
   bun build ./src/index.ts --compile --target="$TARGET" --outfile "$STAGE/$EXE"
   chmod +x "$STAGE/$EXE" 2>/dev/null || true
   cp manifest.json "$STAGE/manifest.json"
+  cp .tabularium "$STAGE/.tabularium"
   cp ui/dist/d1-db-field.js "$STAGE/ui/dist/d1-db-field.js"
 
   (cd "$STAGE" && zip -q -r "$DIST/$BIN_NAME-$PLATFORM.zip" .)

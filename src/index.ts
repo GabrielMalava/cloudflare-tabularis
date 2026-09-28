@@ -39,7 +39,7 @@ rl.on('line', async (line) => {
     send({ jsonrpc: '2.0', result: result === undefined ? null : result, id });
   } catch (e) {
     const err = e as Error;
-    process.stderr.write(`[tubularis-d1] ${method} failed: ${err.stack ?? err.message}\n`);
+    process.stderr.write(`[cloudflare-d1-http] ${method} failed: ${err.stack ?? err.message}\n`);
     send({ jsonrpc: '2.0', error: { code: -32603, message: err.message ?? String(e) }, id });
   }
 });
